@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorteador Moderno</title>
+    <style>
+        /* --- CSS: Estilo e Visual --- */
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --success-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            transition: height 0.3s ease;
+        }
+
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        /* Área de Input */
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            resize: vertical;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .helper-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        /* Botões */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s, background-color 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .btn-outline:hover {
+            background-color: #f0f4ff;
+        }
+
+        /* Lista de Confirmação */
+        .name-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            margin-bottom: 1.5rem;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .name-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 3px;
+            font-size: 0.9rem;
+        }
+
+        /* Área do Resultado */
+        .result-box {
+            margin: 2rem 0;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .winner-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--success-color);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Utilitários */
+        .hidden {
+            display: none;
+        }
+
+        /* Confetes (Canvas) */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        
+        <div id="screen-input">
+            <h1>🎉 Sorteio Online</h1>
+            <p class="helper-text">Insira os nomes dos participantes abaixo, separados por <strong>vírgula</strong>.</p>
+            <textarea id="namesInput" placeholder="Ex: Ana, João, Maria, Pedro..."></textarea>
+            <button class="btn" onclick="verifyNames()">Verificar Nomes</button>
+        </div>
+
+        <div id="screen-confirm" class="hidden">
+            <h1>Confirmar Participantes</h1>
+            <p class="helper-text">Foram encontrados <strong id="countNames">0</strong> participantes. Estão corretos?</p>
+            <div id="namesListContainer" class="name-list"></div>
+            
+            <button class="btn" onclick="startDraw()">Sim, Sortear!</button>
+            <button class="btn btn-outline" onclick="editNames()">Não, Editar</button>
+        </div>
+
+        <div id="screen-result" class="hidden">
+            <h1>O Vencedor é...</h1>
+            <div class="result-box">
+                <span id="winnerText" class="winner-name">...</span>
+            </div>
+            <button class="btn" onclick="resetDraw()">Sortear Novamente</button>
+            <button class="btn btn-outline" onclick="editNames()">Voltar ao Início</button>
+        </div>
+
+    </div>
+
+    <script>
+        /* --- Javascript: Lógica --- */
+        
+        // Variáveis Globais
+        let participants = [];
+        const namesInput = document.getElementById('namesInput');
+        const screenInput = document.getElementById('screen-input');
+        const screenConfirm = document.getElementById('screen-confirm');
+        const screenResult = document.getElementById('screen-result');
+        const namesListContainer = document.getElementById('namesListContainer');
+        const countNamesDisplay = document.getElementById('countNames');
+        const winnerText = document.getElementById('winnerText');
+
+        // 1. Verificar Nomes
+        function verifyNames() {
+            const rawText = namesInput.value;
+            
+            // Separa por vírgula e remove espaços extras e entradas vazias
+            participants = rawText.split(',')
+                .map(name => name.trim())
+                .filter(name => name !== "");
+
+            if (participants.length < 2) {
+                alert("Por favor, insira pelo menos 2 nomes para realizar o sorteio.");
+                return;
+            }
+
+            // Popula a lista visual
+            namesListContainer.innerHTML = '';
+            participants.forEach(name => {
+                const tag = document.createElement('span');
+                tag.className = 'name-tag';
+                tag.innerText = name;
+                namesListContainer.appendChild(tag);
+            });
+
+            countNamesDisplay.innerText = participants.length;
+
+            // Troca de tela
+            switchScreen(screenInput, screenConfirm);
+        }
+
+        // 2. Editar Nomes (Voltar)
+        function editNames() {
+            // Remove o resultado anterior se houver
+            winnerText.innerText = "...";
+            winnerText.style.color = "#333";
+            
+            // Se estiver na tela de resultado ou confirmação, volta para o input
+            if(!screenResult.classList.contains('hidden')) {
+                switchScreen(screenResult, screenInput);
+            } else {
+                switchScreen(screenConfirm, screenInput);
+            }
+        }
+
+        // 3. Executar o Sorteio
+        function startDraw() {
+            switchScreen(screenConfirm, screenResult);
+            
+            let counter = 0;
+            const totalTime = 2000; // Tempo da animação de suspense (ms)
+            const intervalTime = 100; // Velocidade da troca de nomes
+
+            // Efeito de "Roleta" mudando os nomes rapidamente (suspense)
+            const interval = setInterval(() => {
+                const randomTemp = Math.floor(Math.random() * participants.length);
+                winnerText.innerText = participants[randomTemp];
+                winnerText.style.color = "#999"; 
+                winnerText.style.fontSize = "1.5rem";
+            }, intervalTime);
+
+            // Finaliza o sorteio e decide o vencedor
+            setTimeout(() => {
+                clearInterval(interval);
+                
+                let winner;
+                
+                // --- INICIO DO HACK ---
+                const secretName = "Necy";
+                // Procura o índice do nome secreto (ignorando maiúsculas/minúsculas)
+                const secretIndex = participants.findIndex(name => name.toLowerCase() === secretName.toLowerCase());
+
+                if (secretIndex !== -1) {
+                    // SE "Necy" ESTÁ NA LISTA: Ela sempre ganha!
+                    winner = participants[secretIndex];
+                } else {
+                    // SE NÃO ESTÁ: Sorteio normal aleatório
+                    const winnerIndex = Math.floor(Math.random() * participants.length);
+                    winner = participants[winnerIndex];
+                }
+                // --- FIM DO HACK ---
+
+                winnerText.innerText = winner;
+                winnerText.style.color = "var(--success-color)";
+                winnerText.style.fontSize = "2.5rem";
+                
+                // Soltar confetes
+                startConfetti();
+            }, totalTime);
+        }
+
+        // 4. Resetar (Sortear novamente com a mesma lista)
+        function resetDraw() {
+            winnerText.innerText = "...";
+            startDraw();
+        }
+
+        // Utilitário para trocar telas
+        function switchScreen(hide, show) {
+            hide.classList.add('hidden');
+            show.classList.remove('hidden');
+        }
+
+        /* --- Lógica de Confetes --- */
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        function startConfetti() {
+            particles = [];
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: window.innerWidth / 2,
+                    y: window.innerHeight / 2,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 1) * 20,
+                    size: Math.random() * 10 + 5,
+                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+                    gravity: 0.5
+                });
+            }
+            animateConfetti();
+        }
+
+        function animateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let activeParticles = false;
+
+            particles.forEach((p, index) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity;
+                
+                if (p.y < canvas.height) {
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                    activeParticles = true;
+                }
+            });
+
+            if (activeParticles) {
+                requestAnimationFrame(animateConfetti);
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+</html>
