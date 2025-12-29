@@ -3,735 +3,205 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteador Completo</title>
-    <style>
-        /* --- CSS: Estilo e Visual --- */
-        :root {
-            --primary-color: #6366f1;
-            --primary-hover: #4f46e5;
-            --secondary-color: #ec4899;
-            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --success-color: #10b981;
-            --border-radius: 20px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background: var(--bg-gradient);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 550px;
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        h1 {
-            color: var(--text-color);
-            margin-bottom: 0.5rem;
-            font-size: 1.8rem;
-        }
-
-        h2 {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 1.5rem;
-            font-weight: normal;
-        }
-
-        .helper-text {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        /* MENU INICIAL */
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .menu-card {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-            padding: 20px 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .menu-card:hover {
-            border-color: var(--primary-color);
-            background: #eef2ff;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-        }
-
-        .menu-icon {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .menu-title {
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        /* INPUTS E FORMULÁRIOS */
-        textarea {
-            width: 100%;
-            height: 120px;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            resize: vertical;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus,
-        input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .input-wrapper {
-            text-align: left;
-            flex: 1;
-        }
-
-        .input-wrapper label {
-            display: block;
-            font-size: 0.8rem;
-            margin-bottom: 5px;
-            color: #666;
-        }
-
-        .number-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            text-align: center;
-            outline: none;
-        }
-
-        /* BOTÕES */
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.1s, background-color 0.2s;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .btn-outline:hover {
-            background-color: #f0f4ff;
-        }
-
-        .btn-back {
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-decoration: underline;
-            margin-top: 15px;
-        }
-
-        /* LISTA DE NOMES (Visualização Input) */
-        .name-list {
-            list-style: none;
-            max-height: 150px;
-            overflow-y: auto;
-            text-align: left;
-            margin-bottom: 1.5rem;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .name-tag {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #3730a3;
-            padding: 4px 10px;
-            border-radius: 15px;
-            margin: 3px;
-            font-size: 0.85rem;
-        }
-
-        /* ÁREA DE RESULTADO (Nomes e Números) */
-        .result-box {
-            margin: 1.5rem 0;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #fafafa;
-            border-radius: 15px;
-            border: 1px dashed #ccc;
-            padding: 10px;
-        }
-
-        .winner-display {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--success-color);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            word-break: break-word;
-            /* Para nomes muito longos */
-        }
-
-        /* HISTÓRICO GERAL (Estilo compartilhado) */
-        .history-container {
-            margin-top: 20px;
-            text-align: left;
-            border-top: 1px solid #eee;
-            padding-top: 15px;
-        }
-
-        .history-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        /* Histórico de Números (Bolinhas) */
-        .history-grid-numbers {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .history-ball {
-            width: 35px;
-            height: 35px;
-            background-color: #e2e8f0;
-            color: #475569;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            font-weight: bold;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .history-ball.latest {
-            background-color: var(--secondary-color);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-        }
-
-        /* Histórico de Nomes (Tags) */
-        .history-list-names {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-
-        .history-name-tag {
-            background: #f1f5f9;
-            color: #475569;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.85rem;
-            animation: fadeIn 0.5s ease;
-            border: 1px solid #cbd5e1;
-        }
-
-        .history-name-tag.latest {
-            background: var(--secondary-color);
-            color: white;
-            border-color: var(--secondary-color);
-        }
-
-        /* Utilitários */
-        .hidden {
-            display: none !important;
-        }
-
-        @keyframes popIn {
-            0% {
-                transform: scale(0);
-                opacity: 0;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Canvas Confetes */
-        #confetti-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 999;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sorteador App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
     <canvas id="confetti-canvas"></canvas>
 
-    <div class="container">
+    <button class="btn-settings" id="btnOpenSettings" title="Configurações">
+        <span class="material-icons-round">settings</span>
+    </button>
 
-        <div id="screen-menu">
-            <h1>Sorteador Online</h1>
-            <h2>O que vamos sortear hoje?</h2>
+    <div class="main-wrapper">
+        <div class="container">
 
-            <div class="menu-grid">
-                <div class="menu-card" onclick="goToScreen('screen-numbers-input')">
-                    <div class="menu-icon">🔢</div>
-                    <div class="menu-title">Números</div>
+            <section id="screen-menu" class="screen">
+                <div class="brand-header">
+                    <span class="material-icons-round brand-icon">auto_awesome</span>
+                    <h1>Sorteador</h1>
                 </div>
-                <div class="menu-card" onclick="goToScreen('screen-names-input')">
-                    <div class="menu-icon">📝</div>
-                    <div class="menu-title">Nomes</div>
+                <p class="subtitle">Toque para começar</p>
+
+                <div class="menu-grid">
+                    <div class="menu-card" data-target="numbers">
+                        <div class="icon-box"><span class="material-icons-round">filter_7</span></div>
+                        <span class="menu-title">Números</span>
+                        <span class="menu-desc">Bingo e Rifas</span>
+                    </div>
+                    <div class="menu-card" data-target="names">
+                        <div class="icon-box"><span class="material-icons-round">groups</span></div>
+                        <span class="menu-title">Nomes</span>
+                        <span class="menu-desc">Listas e Grupos</span>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-
-        <div id="screen-numbers-input" class="hidden">
-            <h1>Sorteio de Números</h1>
-            <p class="helper-text">Defina o intervalo (ex: rifa de 1 a 100).</p>
-
-            <div class="input-group">
-                <div class="input-wrapper">
-                    <label>Do número:</label>
-                    <input type="number" id="numMin" class="number-input" value="1">
+            <section id="screen-numbers-setup" class="screen hidden">
+                <div class="header-nav">
+                    <button class="btn-icon-back" data-back="screen-menu"><span
+                            class="material-icons-round">arrow_back_ios_new</span></button>
+                    <h2>Configurar</h2>
                 </div>
-                <div class="input-wrapper">
-                    <label>Ao número:</label>
-                    <input type="number" id="numMax" class="number-input" value="100">
+
+                <div class="input-group-row">
+                    <div class="input-wrapper">
+                        <label>De</label>
+                        <input type="number" id="numMin" class="number-input" value="1" pattern="\d*">
+                    </div>
+                    <div class="input-wrapper">
+                        <label>Até</label>
+                        <input type="number" id="numMax" class="number-input" value="100" pattern="\d*">
+                    </div>
                 </div>
-            </div>
-
-            <button class="btn" onclick="initNumberDraw()">Começar Sorteio</button>
-            <button class="btn-back" onclick="goToScreen('screen-menu')">Voltar ao Menu</button>
-        </div>
-
-        <div id="screen-numbers-play" class="hidden">
-            <h1>Sorteando...</h1>
-
-            <div class="result-box">
-                <span id="numberDisplay" class="winner-display" style="color: #ccc; font-size: 2rem;">---</span>
-            </div>
-
-            <button id="btnDrawNextNum" class="btn" onclick="drawNextNumber()">Sortear Próximo</button>
-            <button class="btn btn-outline" onclick="resetNumberDraw()">Reiniciar</button>
-
-            <div class="history-container">
-                <div class="history-label">Números já sorteados (<span id="drawnCountNum">0</span>):</div>
-                <div id="historyGridNum" class="history-grid-numbers">
+                <div class="bottom-action">
+                    <button class="btn-primary" id="btnStartNumbers">Começar</button>
                 </div>
-            </div>
+            </section>
 
-            <button class="btn-back" onclick="goToScreen('screen-menu')">Sair para o Menu</button>
-        </div>
-
-
-        <div id="screen-names-input" class="hidden">
-            <h1>Sorteio de Nomes</h1>
-            <p class="helper-text">Cole os nomes separados por <strong>vírgula</strong>.</p>
-            <textarea id="namesInput" placeholder="Ex: Ana, João, Maria, Pedro..."></textarea>
-            <button class="btn" onclick="verifyNames()">Verificar Nomes</button>
-            <button class="btn-back" onclick="goToScreen('screen-menu')">Voltar ao Menu</button>
-        </div>
-
-        <div id="screen-names-confirm" class="hidden">
-            <h1>Confirmar</h1>
-            <p class="helper-text">Encontrados: <strong id="countNamesInput">0</strong> nomes.</p>
-            <div id="namesListContainer" class="name-list"></div>
-
-            <button class="btn" onclick="initNameDraw()">Começar Sorteio!</button>
-            <button class="btn btn-outline" onclick="goToScreen('screen-names-input')">Editar Lista</button>
-        </div>
-
-        <div id="screen-names-play" class="hidden">
-            <h1>Vencedor!</h1>
-            <div class="result-box">
-                <span id="nameWinnerDisplay" class="winner-display"
-                    style="color:#ccc; font-size: 1.5rem">Prepare-se...</span>
-            </div>
-
-            <button id="btnDrawNextName" class="btn" onclick="drawNextName()">Sortear Próximo</button>
-            <button class="btn btn-outline" onclick="resetNameDraw()">Reiniciar Sorteio</button>
-
-            <div class="history-container">
-                <div class="history-label">Nomes já sorteados (<span id="drawnCountName">0</span>):</div>
-                <div id="historyListNames" class="history-list-names">
+            <section id="screen-numbers-play" class="screen hidden">
+                <div class="header-nav">
+                    <button class="btn-icon-back" id="btnBackNumPlay"><span
+                            class="material-icons-round">arrow_back_ios_new</span></button>
+                    <h2>Sorteando</h2>
                 </div>
-            </div>
 
-            <button class="btn-back" onclick="goToScreen('screen-menu')">Sair para o Menu</button>
+                <div class="result-box">
+                    <span id="displayNumber" class="winner-display">---</span>
+                </div>
+
+                <div class="controls-area">
+                    <button class="btn-primary" id="btnDrawNumber">Sortear Próximo</button>
+                    <button class="btn-ghost" id="btnResetNumber">Reiniciar</button>
+                </div>
+
+                <div class="history-container">
+                    <div class="history-header">
+                        <span class="label">Histórico</span>
+                        <span class="badge" id="countNum">0</span>
+                    </div>
+                    <div id="historyGridNum" class="history-grid-numbers"></div>
+                </div>
+            </section>
+
+            <section id="screen-names-setup" class="screen hidden">
+                <div class="header-nav">
+                    <button class="btn-icon-back" data-back="screen-menu"><span
+                            class="material-icons-round">arrow_back_ios_new</span></button>
+                    <h2>Lista de Nomes</h2>
+                </div>
+
+                <textarea id="namesInput" placeholder="Digite os nomes aqui..."></textarea>
+
+                <div class="file-upload-area">
+                    <input type="file" id="fileInput" accept=".txt,.csv" hidden>
+                    <button class="btn-secondary small" id="btnImportFile">
+                        <span class="material-icons-round">upload_file</span> Carregar TXT
+                    </button>
+                    <p class="file-instruction">Separe por linha ou vírgula.</p>
+                </div>
+
+                <div class="bottom-action">
+                    <button class="btn-primary" id="btnVerifyNames">Validar e Começar</button>
+                </div>
+            </section>
+
+            <section id="screen-names-play" class="screen hidden">
+                <div class="header-nav">
+                    <button class="btn-icon-back" id="btnBackNamePlay"><span
+                            class="material-icons-round">arrow_back_ios_new</span></button>
+                    <h2>Sorteio</h2>
+                </div>
+
+                <div class="result-box">
+                    <span id="displayName" class="winner-display small-text">Pronto?</span>
+                </div>
+
+                <div class="controls-area">
+                    <button class="btn-primary" id="btnDrawName">Sortear Nome</button>
+                    <button class="btn-ghost" id="btnResetName">Reiniciar</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Faltam</span>
+                        <span class="stat-value" id="countRest">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sorteados</span>
+                        <span class="stat-value highlight" id="countDrawn">0</span>
+                    </div>
+                </div>
+
+                <div class="history-tabs">
+                    <button class="tab-btn active" data-tab="history">Já saiu</button>
+                    <button class="tab-btn" data-tab="pending">Na fila</button>
+                </div>
+
+                <div id="listHistory" class="list-container active"></div>
+                <div id="listPending" class="list-container"></div>
+            </section>
         </div>
-
     </div>
 
-    <script>
-        /* --- GESTÃO DE TELAS --- */
-        const allScreens = [
-            'screen-menu',
-            'screen-numbers-input', 'screen-numbers-play',
-            'screen-names-input', 'screen-names-confirm', 'screen-names-play'
-        ];
+    <div id="modalSettings" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-drag-handle"></div>
+            <div class="modal-header">
+                <h3>Ajustes</h3>
+                <button class="btn-close-modal" id="btnCloseSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <label>Tema Escuro</label>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleTheme">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-text">
+                        <label>Sons</label>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="toggleSound" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="setting-item">
+                    <label>Velocidade</label>
+                    <select id="selectSpeed" class="input-select">
+                        <option value="1000">Rápido (1s)</option>
+                        <option value="3000" selected>Padrão (3s)</option>
+                        <option value="5000">Lento (5s)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary full" id="btnSaveSettings">Salvar</button>
+            </div>
+        </div>
+    </div>
 
-        function goToScreen(screenId) {
-            allScreens.forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-        }
+    <div id="modalRecover" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3>Continuar?</h3>
+            <p>Existe um sorteio em andamento.</p>
+            <div class="modal-footer-row">
+                <button class="btn-ghost" id="btnDiscardSession">Apagar</button>
+                <button class="btn-primary" id="btnRecoverSession">Retomar</button>
+            </div>
+        </div>
+    </div>
 
-        /* ==========================================
-           LÓGICA: SORTEIO DE NÚMEROS (Sem repetição)
-           ========================================== */
-        let availableNumbers = [];
-        let drawnNumbersHistory = [];
-
-        const numMinInput = document.getElementById('numMin');
-        const numMaxInput = document.getElementById('numMax');
-        const numberDisplay = document.getElementById('numberDisplay');
-        const historyGridNum = document.getElementById('historyGridNum');
-        const drawnCountNum = document.getElementById('drawnCountNum');
-        const btnDrawNextNum = document.getElementById('btnDrawNextNum');
-
-        function initNumberDraw() {
-            const min = parseInt(numMinInput.value);
-            const max = parseInt(numMaxInput.value);
-
-            if (isNaN(min) || isNaN(max) || min >= max) {
-                alert("Intervalo inválido (Mínimo deve ser menor que o Máximo).");
-                return;
-            }
-
-            availableNumbers = [];
-            drawnNumbersHistory = [];
-            for (let i = min; i <= max; i++) {
-                availableNumbers.push(i);
-            }
-
-            numberDisplay.innerText = "---";
-            numberDisplay.style.color = "#ccc";
-            numberDisplay.style.fontSize = "2rem";
-            historyGridNum.innerHTML = "";
-            drawnCountNum.innerText = "0";
-
-            btnDrawNextNum.disabled = false;
-            btnDrawNextNum.innerText = "Sortear Próximo";
-
-            goToScreen('screen-numbers-play');
-        }
-
-        function drawNextNumber() {
-            if (availableNumbers.length === 0) return;
-
-            btnDrawNextNum.disabled = true; // Evita duplo clique
-
-            let counter = 0;
-            const suspense = setInterval(() => {
-                const r = Math.floor(Math.random() * availableNumbers.length);
-                numberDisplay.innerText = availableNumbers[r];
-                numberDisplay.style.color = "#999";
-                counter++;
-                if (counter > 10) clearInterval(suspense);
-            }, 60);
-
-            setTimeout(() => {
-                clearInterval(suspense);
-                const idx = Math.floor(Math.random() * availableNumbers.length);
-                const val = availableNumbers[idx];
-
-                availableNumbers.splice(idx, 1);
-                drawnNumbersHistory.push(val);
-
-                numberDisplay.innerText = val;
-                numberDisplay.style.color = "var(--primary-color)";
-                numberDisplay.style.fontSize = "4rem";
-
-                updateHistoryNum(val);
-
-                if (availableNumbers.length === 0) {
-                    btnDrawNextNum.innerText = "Sorteio Finalizado";
-                    btnDrawNextNum.disabled = true;
-                } else {
-                    btnDrawNextNum.disabled = false;
-                }
-            }, 700);
-        }
-
-        function updateHistoryNum(val) {
-            document.querySelectorAll('.history-ball').forEach(b => b.classList.remove('latest'));
-            const ball = document.createElement('div');
-            ball.className = 'history-ball latest';
-            ball.innerText = val;
-            historyGridNum.appendChild(ball);
-            historyGridNum.scrollTop = historyGridNum.scrollHeight;
-            drawnCountNum.innerText = drawnNumbersHistory.length;
-        }
-
-        function resetNumberDraw() {
-            if (confirm("Reiniciar sorteio de números?")) initNumberDraw();
-        }
-
-        /* ==========================================
-           LÓGICA: SORTEIO DE NOMES (Com Histórico)
-           ========================================== */
-        let availableNames = []; // Nomes disponíveis para sorteio
-        let drawnNamesHistory = []; // Nomes já sorteados
-
-        const namesInput = document.getElementById('namesInput');
-        const namesListContainer = document.getElementById('namesListContainer');
-        const countNamesInput = document.getElementById('countNamesInput');
-
-        const nameWinnerDisplay = document.getElementById('nameWinnerDisplay');
-        const btnDrawNextName = document.getElementById('btnDrawNextName');
-        const historyListNames = document.getElementById('historyListNames');
-        const drawnCountName = document.getElementById('drawnCountName');
-
-        function verifyNames() {
-            const rawText = namesInput.value;
-            // Limpa e prepara lista inicial
-            const tempList = rawText.split(',').map(n => n.trim()).filter(n => n !== "");
-
-            if (tempList.length < 2) {
-                alert("Insira pelo menos 2 nomes.");
-                return;
-            }
-
-            // Exibe na confirmação
-            namesListContainer.innerHTML = '';
-            tempList.forEach(name => {
-                const tag = document.createElement('span');
-                tag.className = 'name-tag';
-                tag.innerText = name;
-                namesListContainer.appendChild(tag);
-            });
-
-            countNamesInput.innerText = tempList.length;
-            goToScreen('screen-names-confirm');
-        }
-
-        function initNameDraw() {
-            // Pega os nomes do input original novamente para garantir
-            const rawText = namesInput.value;
-            availableNames = rawText.split(',').map(n => n.trim()).filter(n => n !== "");
-            drawnNamesHistory = [];
-
-            // Reseta visual da tela de jogo
-            nameWinnerDisplay.innerText = "Toque em Sortear";
-            nameWinnerDisplay.style.color = "#ccc";
-            nameWinnerDisplay.style.fontSize = "1.5rem";
-
-            historyListNames.innerHTML = "";
-            drawnCountName.innerText = "0";
-
-            btnDrawNextName.disabled = false;
-            btnDrawNextName.innerText = "Sortear Próximo";
-
-            goToScreen('screen-names-play');
-        }
-
-        function drawNextName() {
-            if (availableNames.length === 0) return;
-
-            btnDrawNextName.disabled = true;
-
-            // Animação de suspense
-            const interval = setInterval(() => {
-                const rand = Math.floor(Math.random() * availableNames.length);
-                nameWinnerDisplay.innerText = availableNames[rand];
-                nameWinnerDisplay.style.color = "#999";
-                nameWinnerDisplay.style.fontSize = "2rem";
-            }, 80);
-
-            setTimeout(() => {
-                clearInterval(interval);
-
-                // Lógica de sorteio sem repetição
-                const winnerIndex = Math.floor(Math.random() * availableNames.length);
-                const winnerName = availableNames[winnerIndex];
-
-                // Remove dos disponíveis
-                availableNames.splice(winnerIndex, 1);
-                // Adiciona ao histórico
-                drawnNamesHistory.push(winnerName);
-
-                // Mostra Vencedor
-                nameWinnerDisplay.innerText = winnerName;
-                nameWinnerDisplay.style.color = "var(--success-color)";
-                nameWinnerDisplay.style.fontSize = "3rem";
-
-                startConfetti(); // Festa!
-
-                // Atualiza lista de histórico
-                updateHistoryName(winnerName);
-
-                // Verifica fim
-                if (availableNames.length === 0) {
-                    btnDrawNextName.innerText = "Todos sorteados!";
-                    btnDrawNextName.disabled = true;
-                } else {
-                    btnDrawNextName.disabled = false;
-                }
-
-            }, 1500);
-        }
-
-        function updateHistoryName(name) {
-            document.querySelectorAll('.history-name-tag').forEach(t => t.classList.remove('latest'));
-
-            const tag = document.createElement('span');
-            tag.className = 'history-name-tag latest';
-            tag.innerText = name;
-
-            historyListNames.appendChild(tag);
-            historyListNames.scrollTop = historyListNames.scrollHeight;
-            drawnCountName.innerText = drawnNamesHistory.length;
-        }
-
-        function resetNameDraw() {
-            if (confirm("Deseja reiniciar o sorteio de nomes? O histórico será apagado.")) {
-                // Volta para a confirmação ou reinicia direto. Vamos reiniciar direto com a mesma lista.
-                initNameDraw();
-            }
-        }
-
-
-        /* ==========================================
-           UTILITÁRIO: CONFETES
-           ========================================== */
-        const canvas = document.getElementById('confetti-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function startConfetti() {
-            particles = [];
-            for (let i = 0; i < 150; i++) {
-                particles.push({
-                    x: window.innerWidth / 2,
-                    y: window.innerHeight / 2,
-                    vx: (Math.random() - 0.5) * 20,
-                    vy: (Math.random() - 1) * 20,
-                    size: Math.random() * 10 + 5,
-                    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
-                    gravity: 0.5
-                });
-            }
-            animateConfetti();
-        }
-
-        function animateConfetti() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let active = false;
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += p.gravity;
-                if (p.y < canvas.height) {
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(p.x, p.y, p.size, p.size);
-                    active = true;
-                }
-            });
-            if (active) requestAnimationFrame(animateConfetti);
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
