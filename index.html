@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteador Moderno</title>
+    <title>Sorteador Completo</title>
     <style>
         /* --- CSS: Estilo e Visual --- */
         :root {
             --primary-color: #6366f1;
             --primary-hover: #4f46e5;
+            --secondary-color: #ec4899;
             --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --card-bg: #ffffff;
             --text-color: #333;
             --success-color: #10b981;
+            --border-radius: 20px;
         }
 
         * {
@@ -34,21 +37,75 @@
         .container {
             background: var(--card-bg);
             padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             text-align: center;
-            transition: height 0.3s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         h1 {
             color: var(--text-color);
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
             font-size: 1.8rem;
         }
 
-        /* Área de Input */
+        h2 {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-weight: normal;
+        }
+
+        .helper-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        /* MENU INICIAL */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .menu-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-card:hover {
+            border-color: var(--primary-color);
+            background: #eef2ff;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .menu-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .menu-title {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* INPUTS E FORMULÁRIOS */
         textarea {
             width: 100%;
             height: 120px;
@@ -62,18 +119,41 @@
             transition: border-color 0.3s;
         }
 
-        textarea:focus {
+        textarea:focus,
+        input:focus {
             border-color: var(--primary-color);
         }
 
-        .helper-text {
-            font-size: 0.85rem;
-            color: #666;
+        .input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
             margin-bottom: 1.5rem;
-            text-align: left;
         }
 
-        /* Botões */
+        .input-wrapper {
+            text-align: left;
+            flex: 1;
+        }
+
+        .input-wrapper label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .number-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+        }
+
+        /* BOTÕES */
         .btn {
             background-color: var(--primary-color);
             color: white;
@@ -96,6 +176,12 @@
             transform: scale(0.98);
         }
 
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-outline {
             background-color: transparent;
             border: 2px solid var(--primary-color);
@@ -107,10 +193,20 @@
             background-color: #f0f4ff;
         }
 
-        /* Lista de Confirmação */
+        .btn-back {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 15px;
+        }
+
+        /* LISTA DE NOMES (Visualização Input) */
         .name-list {
             list-style: none;
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
             text-align: left;
             margin-bottom: 1.5rem;
@@ -123,34 +219,133 @@
             display: inline-block;
             background: #e0e7ff;
             color: #3730a3;
-            padding: 5px 10px;
+            padding: 4px 10px;
             border-radius: 15px;
             margin: 3px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
-        /* Área do Resultado */
+        /* ÁREA DE RESULTADO (Nomes e Números) */
         .result-box {
-            margin: 2rem 0;
-            height: 80px;
+            margin: 1.5rem 0;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #fafafa;
+            border-radius: 15px;
+            border: 1px dashed #ccc;
+            padding: 10px;
         }
 
-        .winner-name {
+        .winner-display {
             font-size: 2.5rem;
             font-weight: bold;
             color: var(--success-color);
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-break: break-word;
+            /* Para nomes muito longos */
+        }
+
+        /* HISTÓRICO GERAL (Estilo compartilhado) */
+        .history-container {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .history-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        /* Histórico de Números (Bolinhas) */
+        .history-grid-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history-ball {
+            width: 35px;
+            height: 35px;
+            background-color: #e2e8f0;
+            color: #475569;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .history-ball.latest {
+            background-color: var(--secondary-color);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* Histórico de Nomes (Tags) */
+        .history-list-names {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .history-name-tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            animation: fadeIn 0.5s ease;
+            border: 1px solid #cbd5e1;
+        }
+
+        .history-name-tag.latest {
+            background: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
         }
 
         /* Utilitários */
         .hidden {
-            display: none;
+            display: none !important;
         }
 
-        /* Confetes (Canvas) */
+        @keyframes popIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Canvas Confetes */
         #confetti-canvas {
             position: fixed;
             top: 0;
@@ -160,152 +355,350 @@
             pointer-events: none;
             z-index: 999;
         }
-
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
     </style>
 </head>
+
 <body>
 
     <canvas id="confetti-canvas"></canvas>
 
     <div class="container">
-        
-        <div id="screen-input">
-            <h1>🎉 Sorteio Online</h1>
-            <p class="helper-text">Insira os nomes dos participantes abaixo, separados por <strong>vírgula</strong>.</p>
+
+        <div id="screen-menu">
+            <h1>Sorteador Online</h1>
+            <h2>O que vamos sortear hoje?</h2>
+
+            <div class="menu-grid">
+                <div class="menu-card" onclick="goToScreen('screen-numbers-input')">
+                    <div class="menu-icon">🔢</div>
+                    <div class="menu-title">Números</div>
+                </div>
+                <div class="menu-card" onclick="goToScreen('screen-names-input')">
+                    <div class="menu-icon">📝</div>
+                    <div class="menu-title">Nomes</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="screen-numbers-input" class="hidden">
+            <h1>Sorteio de Números</h1>
+            <p class="helper-text">Defina o intervalo (ex: rifa de 1 a 100).</p>
+
+            <div class="input-group">
+                <div class="input-wrapper">
+                    <label>Do número:</label>
+                    <input type="number" id="numMin" class="number-input" value="1">
+                </div>
+                <div class="input-wrapper">
+                    <label>Ao número:</label>
+                    <input type="number" id="numMax" class="number-input" value="100">
+                </div>
+            </div>
+
+            <button class="btn" onclick="initNumberDraw()">Começar Sorteio</button>
+            <button class="btn-back" onclick="goToScreen('screen-menu')">Voltar ao Menu</button>
+        </div>
+
+        <div id="screen-numbers-play" class="hidden">
+            <h1>Sorteando...</h1>
+
+            <div class="result-box">
+                <span id="numberDisplay" class="winner-display" style="color: #ccc; font-size: 2rem;">---</span>
+            </div>
+
+            <button id="btnDrawNextNum" class="btn" onclick="drawNextNumber()">Sortear Próximo</button>
+            <button class="btn btn-outline" onclick="resetNumberDraw()">Reiniciar</button>
+
+            <div class="history-container">
+                <div class="history-label">Números já sorteados (<span id="drawnCountNum">0</span>):</div>
+                <div id="historyGridNum" class="history-grid-numbers">
+                </div>
+            </div>
+
+            <button class="btn-back" onclick="goToScreen('screen-menu')">Sair para o Menu</button>
+        </div>
+
+
+        <div id="screen-names-input" class="hidden">
+            <h1>Sorteio de Nomes</h1>
+            <p class="helper-text">Cole os nomes separados por <strong>vírgula</strong>.</p>
             <textarea id="namesInput" placeholder="Ex: Ana, João, Maria, Pedro..."></textarea>
             <button class="btn" onclick="verifyNames()">Verificar Nomes</button>
+            <button class="btn-back" onclick="goToScreen('screen-menu')">Voltar ao Menu</button>
         </div>
 
-        <div id="screen-confirm" class="hidden">
-            <h1>Confirmar Participantes</h1>
-            <p class="helper-text">Foram encontrados <strong id="countNames">0</strong> participantes. Estão corretos?</p>
+        <div id="screen-names-confirm" class="hidden">
+            <h1>Confirmar</h1>
+            <p class="helper-text">Encontrados: <strong id="countNamesInput">0</strong> nomes.</p>
             <div id="namesListContainer" class="name-list"></div>
-            
-            <button class="btn" onclick="startDraw()">Sim, Sortear!</button>
-            <button class="btn btn-outline" onclick="editNames()">Não, Editar</button>
+
+            <button class="btn" onclick="initNameDraw()">Começar Sorteio!</button>
+            <button class="btn btn-outline" onclick="goToScreen('screen-names-input')">Editar Lista</button>
         </div>
 
-        <div id="screen-result" class="hidden">
-            <h1>O Vencedor é...</h1>
+        <div id="screen-names-play" class="hidden">
+            <h1>Vencedor!</h1>
             <div class="result-box">
-                <span id="winnerText" class="winner-name">...</span>
+                <span id="nameWinnerDisplay" class="winner-display"
+                    style="color:#ccc; font-size: 1.5rem">Prepare-se...</span>
             </div>
-            <button class="btn" onclick="resetDraw()">Sortear Novamente</button>
-            <button class="btn btn-outline" onclick="editNames()">Voltar ao Início</button>
+
+            <button id="btnDrawNextName" class="btn" onclick="drawNextName()">Sortear Próximo</button>
+            <button class="btn btn-outline" onclick="resetNameDraw()">Reiniciar Sorteio</button>
+
+            <div class="history-container">
+                <div class="history-label">Nomes já sorteados (<span id="drawnCountName">0</span>):</div>
+                <div id="historyListNames" class="history-list-names">
+                </div>
+            </div>
+
+            <button class="btn-back" onclick="goToScreen('screen-menu')">Sair para o Menu</button>
         </div>
 
     </div>
 
     <script>
-        /* --- Javascript: Lógica --- */
-        
-        // Variáveis Globais
-        let participants = [];
-        const namesInput = document.getElementById('namesInput');
-        const screenInput = document.getElementById('screen-input');
-        const screenConfirm = document.getElementById('screen-confirm');
-        const screenResult = document.getElementById('screen-result');
-        const namesListContainer = document.getElementById('namesListContainer');
-        const countNamesDisplay = document.getElementById('countNames');
-        const winnerText = document.getElementById('winnerText');
+        /* --- GESTÃO DE TELAS --- */
+        const allScreens = [
+            'screen-menu',
+            'screen-numbers-input', 'screen-numbers-play',
+            'screen-names-input', 'screen-names-confirm', 'screen-names-play'
+        ];
 
-        // 1. Verificar Nomes
-        function verifyNames() {
-            const rawText = namesInput.value;
-            
-            // Separa por vírgula e remove espaços extras e entradas vazias
-            participants = rawText.split(',')
-                .map(name => name.trim())
-                .filter(name => name !== "");
+        function goToScreen(screenId) {
+            allScreens.forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
 
-            if (participants.length < 2) {
-                alert("Por favor, insira pelo menos 2 nomes para realizar o sorteio.");
+        /* ==========================================
+           LÓGICA: SORTEIO DE NÚMEROS (Sem repetição)
+           ========================================== */
+        let availableNumbers = [];
+        let drawnNumbersHistory = [];
+
+        const numMinInput = document.getElementById('numMin');
+        const numMaxInput = document.getElementById('numMax');
+        const numberDisplay = document.getElementById('numberDisplay');
+        const historyGridNum = document.getElementById('historyGridNum');
+        const drawnCountNum = document.getElementById('drawnCountNum');
+        const btnDrawNextNum = document.getElementById('btnDrawNextNum');
+
+        function initNumberDraw() {
+            const min = parseInt(numMinInput.value);
+            const max = parseInt(numMaxInput.value);
+
+            if (isNaN(min) || isNaN(max) || min >= max) {
+                alert("Intervalo inválido (Mínimo deve ser menor que o Máximo).");
                 return;
             }
 
-            // Popula a lista visual
+            availableNumbers = [];
+            drawnNumbersHistory = [];
+            for (let i = min; i <= max; i++) {
+                availableNumbers.push(i);
+            }
+
+            numberDisplay.innerText = "---";
+            numberDisplay.style.color = "#ccc";
+            numberDisplay.style.fontSize = "2rem";
+            historyGridNum.innerHTML = "";
+            drawnCountNum.innerText = "0";
+
+            btnDrawNextNum.disabled = false;
+            btnDrawNextNum.innerText = "Sortear Próximo";
+
+            goToScreen('screen-numbers-play');
+        }
+
+        function drawNextNumber() {
+            if (availableNumbers.length === 0) return;
+
+            btnDrawNextNum.disabled = true; // Evita duplo clique
+
+            let counter = 0;
+            const suspense = setInterval(() => {
+                const r = Math.floor(Math.random() * availableNumbers.length);
+                numberDisplay.innerText = availableNumbers[r];
+                numberDisplay.style.color = "#999";
+                counter++;
+                if (counter > 10) clearInterval(suspense);
+            }, 60);
+
+            setTimeout(() => {
+                clearInterval(suspense);
+                const idx = Math.floor(Math.random() * availableNumbers.length);
+                const val = availableNumbers[idx];
+
+                availableNumbers.splice(idx, 1);
+                drawnNumbersHistory.push(val);
+
+                numberDisplay.innerText = val;
+                numberDisplay.style.color = "var(--primary-color)";
+                numberDisplay.style.fontSize = "4rem";
+
+                updateHistoryNum(val);
+
+                if (availableNumbers.length === 0) {
+                    btnDrawNextNum.innerText = "Sorteio Finalizado";
+                    btnDrawNextNum.disabled = true;
+                } else {
+                    btnDrawNextNum.disabled = false;
+                }
+            }, 700);
+        }
+
+        function updateHistoryNum(val) {
+            document.querySelectorAll('.history-ball').forEach(b => b.classList.remove('latest'));
+            const ball = document.createElement('div');
+            ball.className = 'history-ball latest';
+            ball.innerText = val;
+            historyGridNum.appendChild(ball);
+            historyGridNum.scrollTop = historyGridNum.scrollHeight;
+            drawnCountNum.innerText = drawnNumbersHistory.length;
+        }
+
+        function resetNumberDraw() {
+            if (confirm("Reiniciar sorteio de números?")) initNumberDraw();
+        }
+
+        /* ==========================================
+           LÓGICA: SORTEIO DE NOMES (Com Histórico)
+           ========================================== */
+        let availableNames = []; // Nomes disponíveis para sorteio
+        let drawnNamesHistory = []; // Nomes já sorteados
+
+        const namesInput = document.getElementById('namesInput');
+        const namesListContainer = document.getElementById('namesListContainer');
+        const countNamesInput = document.getElementById('countNamesInput');
+
+        const nameWinnerDisplay = document.getElementById('nameWinnerDisplay');
+        const btnDrawNextName = document.getElementById('btnDrawNextName');
+        const historyListNames = document.getElementById('historyListNames');
+        const drawnCountName = document.getElementById('drawnCountName');
+
+        function verifyNames() {
+            const rawText = namesInput.value;
+            // Limpa e prepara lista inicial
+            const tempList = rawText.split(',').map(n => n.trim()).filter(n => n !== "");
+
+            if (tempList.length < 2) {
+                alert("Insira pelo menos 2 nomes.");
+                return;
+            }
+
+            // Exibe na confirmação
             namesListContainer.innerHTML = '';
-            participants.forEach(name => {
+            tempList.forEach(name => {
                 const tag = document.createElement('span');
                 tag.className = 'name-tag';
                 tag.innerText = name;
                 namesListContainer.appendChild(tag);
             });
 
-            countNamesDisplay.innerText = participants.length;
-
-            // Troca de tela
-            switchScreen(screenInput, screenConfirm);
+            countNamesInput.innerText = tempList.length;
+            goToScreen('screen-names-confirm');
         }
 
-        // 2. Editar Nomes (Voltar)
-        function editNames() {
-            // Remove o resultado anterior se houver
-            winnerText.innerText = "...";
-            winnerText.style.color = "#333";
-            
-            // Se estiver na tela de resultado ou confirmação, volta para o input
-            if(!screenResult.classList.contains('hidden')) {
-                switchScreen(screenResult, screenInput);
-            } else {
-                switchScreen(screenConfirm, screenInput);
+        function initNameDraw() {
+            // Pega os nomes do input original novamente para garantir
+            const rawText = namesInput.value;
+            availableNames = rawText.split(',').map(n => n.trim()).filter(n => n !== "");
+            drawnNamesHistory = [];
+
+            // Reseta visual da tela de jogo
+            nameWinnerDisplay.innerText = "Toque em Sortear";
+            nameWinnerDisplay.style.color = "#ccc";
+            nameWinnerDisplay.style.fontSize = "1.5rem";
+
+            historyListNames.innerHTML = "";
+            drawnCountName.innerText = "0";
+
+            btnDrawNextName.disabled = false;
+            btnDrawNextName.innerText = "Sortear Próximo";
+
+            goToScreen('screen-names-play');
+        }
+
+        function drawNextName() {
+            if (availableNames.length === 0) return;
+
+            btnDrawNextName.disabled = true;
+
+            // Animação de suspense
+            const interval = setInterval(() => {
+                const rand = Math.floor(Math.random() * availableNames.length);
+                nameWinnerDisplay.innerText = availableNames[rand];
+                nameWinnerDisplay.style.color = "#999";
+                nameWinnerDisplay.style.fontSize = "2rem";
+            }, 80);
+
+            setTimeout(() => {
+                clearInterval(interval);
+
+                // Lógica de sorteio sem repetição
+                const winnerIndex = Math.floor(Math.random() * availableNames.length);
+                const winnerName = availableNames[winnerIndex];
+
+                // Remove dos disponíveis
+                availableNames.splice(winnerIndex, 1);
+                // Adiciona ao histórico
+                drawnNamesHistory.push(winnerName);
+
+                // Mostra Vencedor
+                nameWinnerDisplay.innerText = winnerName;
+                nameWinnerDisplay.style.color = "var(--success-color)";
+                nameWinnerDisplay.style.fontSize = "3rem";
+
+                startConfetti(); // Festa!
+
+                // Atualiza lista de histórico
+                updateHistoryName(winnerName);
+
+                // Verifica fim
+                if (availableNames.length === 0) {
+                    btnDrawNextName.innerText = "Todos sorteados!";
+                    btnDrawNextName.disabled = true;
+                } else {
+                    btnDrawNextName.disabled = false;
+                }
+
+            }, 1500);
+        }
+
+        function updateHistoryName(name) {
+            document.querySelectorAll('.history-name-tag').forEach(t => t.classList.remove('latest'));
+
+            const tag = document.createElement('span');
+            tag.className = 'history-name-tag latest';
+            tag.innerText = name;
+
+            historyListNames.appendChild(tag);
+            historyListNames.scrollTop = historyListNames.scrollHeight;
+            drawnCountName.innerText = drawnNamesHistory.length;
+        }
+
+        function resetNameDraw() {
+            if (confirm("Deseja reiniciar o sorteio de nomes? O histórico será apagado.")) {
+                // Volta para a confirmação ou reinicia direto. Vamos reiniciar direto com a mesma lista.
+                initNameDraw();
             }
         }
 
-        // 3. Executar o Sorteio
-        function startDraw() {
-            switchScreen(screenConfirm, screenResult);
-            
-            let counter = 0;
-            const totalTime = 2000; // Tempo da animação de suspense (ms)
-            const intervalTime = 100; // Velocidade da troca de nomes
 
-            // Efeito de "Roleta" mudando os nomes rapidamente
-            const interval = setInterval(() => {
-                const randomTemp = Math.floor(Math.random() * participants.length);
-                winnerText.innerText = participants[randomTemp];
-                winnerText.style.color = "#999"; // Cor durante o suspense
-                winnerText.style.fontSize = "1.5rem";
-            }, intervalTime);
-
-            // Finaliza o sorteio
-            setTimeout(() => {
-                clearInterval(interval);
-                const winnerIndex = Math.floor(Math.random() * participants.length);
-                const winner = participants[winnerIndex];
-                
-                winnerText.innerText = winner;
-                winnerText.style.color = "var(--success-color)";
-                winnerText.style.fontSize = "2.5rem";
-                
-                // Soltar confetes
-                startConfetti();
-            }, totalTime);
-        }
-
-        // 4. Resetar (Sortear novamente com a mesma lista)
-        function resetDraw() {
-            winnerText.innerText = "...";
-            startDraw();
-        }
-
-        // Utilitário para trocar telas
-        function switchScreen(hide, show) {
-            hide.classList.add('hidden');
-            show.classList.remove('hidden');
-        }
-
-        /* --- Lógica de Confetes (Simples e sem bibliotecas externas pesadas) --- */
+        /* ==========================================
+           UTILITÁRIO: CONFETES
+           ========================================== */
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
 
         function startConfetti() {
             particles = [];
@@ -325,33 +718,20 @@
 
         function animateConfetti() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let activeParticles = false;
-
-            particles.forEach((p, index) => {
+            let active = false;
+            particles.forEach(p => {
                 p.x += p.vx;
                 p.y += p.vy;
                 p.vy += p.gravity;
-                
                 if (p.y < canvas.height) {
                     ctx.fillStyle = p.color;
                     ctx.fillRect(p.x, p.y, p.size, p.size);
-                    activeParticles = true;
+                    active = true;
                 }
             });
-
-            if (activeParticles) {
-                requestAnimationFrame(animateConfetti);
-            } else {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-            }
+            if (active) requestAnimationFrame(animateConfetti);
         }
-
-        // Ajustar canvas ao redimensionar tela
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-
     </script>
 </body>
+
 </html>
