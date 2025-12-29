@@ -264,35 +264,20 @@
             const totalTime = 2000; // Tempo da animação de suspense (ms)
             const intervalTime = 100; // Velocidade da troca de nomes
 
-            // Efeito de "Roleta" mudando os nomes rapidamente (suspense)
+            // Efeito de "Roleta" mudando os nomes rapidamente
             const interval = setInterval(() => {
                 const randomTemp = Math.floor(Math.random() * participants.length);
                 winnerText.innerText = participants[randomTemp];
-                winnerText.style.color = "#999"; 
+                winnerText.style.color = "#999"; // Cor durante o suspense
                 winnerText.style.fontSize = "1.5rem";
             }, intervalTime);
 
-            // Finaliza o sorteio e decide o vencedor
+            // Finaliza o sorteio
             setTimeout(() => {
                 clearInterval(interval);
+                const winnerIndex = Math.floor(Math.random() * participants.length);
+                const winner = participants[winnerIndex];
                 
-                let winner;
-                
-                // --- INICIO DO HACK ---
-                const secretName = "Necy";
-                // Procura o índice do nome secreto (ignorando maiúsculas/minúsculas)
-                const secretIndex = participants.findIndex(name => name.toLowerCase() === secretName.toLowerCase());
-
-                if (secretIndex !== -1) {
-                    // SE "Necy" ESTÁ NA LISTA: Ela sempre ganha!
-                    winner = participants[secretIndex];
-                } else {
-                    // SE NÃO ESTÁ: Sorteio normal aleatório
-                    const winnerIndex = Math.floor(Math.random() * participants.length);
-                    winner = participants[winnerIndex];
-                }
-                // --- FIM DO HACK ---
-
                 winnerText.innerText = winner;
                 winnerText.style.color = "var(--success-color)";
                 winnerText.style.fontSize = "2.5rem";
@@ -314,7 +299,7 @@
             show.classList.remove('hidden');
         }
 
-        /* --- Lógica de Confetes --- */
+        /* --- Lógica de Confetes (Simples e sem bibliotecas externas pesadas) --- */
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -361,6 +346,7 @@
             }
         }
 
+        // Ajustar canvas ao redimensionar tela
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
